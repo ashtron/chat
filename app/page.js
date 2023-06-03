@@ -19,21 +19,6 @@ export default function Home() {
     };
 
     fetchMessages();
-
-    supabase
-      .channel("table_db_changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-        },
-        (payload) => {
-          setMessages([...messages, payload.new.content]);
-        }
-      )
-      .subscribe();
   }, []);
 
   const dummy = useRef(null);

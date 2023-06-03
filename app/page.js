@@ -1,7 +1,7 @@
 "use client";
 
 import { createPagesBrowserClient } from "@supabase/auth-helpers-nextjs";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import "./home.css";
 
@@ -9,6 +9,7 @@ export default function Home() {
   const supabase = createPagesBrowserClient();
 
   const [messages, setMessages] = useState([]);
+  const [messageInput, setMessageInput] = useState("");
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -18,24 +19,28 @@ export default function Home() {
     };
 
     fetchMessages();
+
+    supabase
+      .channel("table_db_changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        (payload) => {
+          setMessages([...messages, payload.new.content]);
+        }
+      )
+      .subscribe();
   }, []);
 
-  const [messageInput, setMessageInput] = useState("");
+  const dummy = useRef(null);
 
-  const channel = supabase
-    .channel("table_db_changes")
-    .on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "messages",
-      },
-      (payload) => {
-        setMessages([...messages, payload.new.content]);
-      }
-    )
-    .subscribe();
+  useEffect(() => {
+    dummy.current.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const insertMessage = async (message) => {
     await supabase
@@ -56,6 +61,29 @@ export default function Home() {
     setMessageInput(event.target.value);
   };
 
+  const handleKeyDown = (event) => {
+    if (event.keyCode === 13) {
+      event.preventDefault();
+
+      insertMessage(messageInput);
+    }
+  };
+
+  const channel = supabase
+    .channel("table_db_changes")
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+      },
+      (payload) => {
+        setMessages([...messages, payload.new.content]);
+      }
+    )
+    .subscribe();
+
   return (
     <article>
       <header>Chat</header>
@@ -63,9 +91,14 @@ export default function Home() {
         {messages.map((message) => {
           return <li>{message}</li>;
         })}
+        <div ref={dummy} />
       </ul>
       <footer>
-        <input value={messageInput} onChange={handleChange} />
+        <input
+          value={messageInput}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+        />
         <button onClick={handleClick}>Send</button>
       </footer>
     </article>

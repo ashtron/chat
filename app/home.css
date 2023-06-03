@@ -3,6 +3,6 @@ ul li {
 }
 
 ul {
-  overflow: scroll;
+  overflow: auto;
   height: 500px;
 }

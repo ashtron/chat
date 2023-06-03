@@ -1,10 +1,9 @@
 "use client";
 
-import Image from "next/image";
-import styles from "./page.module.css";
 import { createPagesBrowserClient } from "@supabase/auth-helpers-nextjs";
 import { useState, useEffect } from "react";
 
+import "./globals.css";
 import "./home.css";
 
 export default function Home() {
@@ -23,14 +22,6 @@ export default function Home() {
   }, []);
 
   const [messageInput, setMessageInput] = useState("");
-
-  // const messagesSubscripchantion = supabase
-  //   .from("messages")
-  //   .select("*")
-  //   .on("INSERT", (data) => {
-  //     setMessages([...messages, data.content]);
-  //   })
-  //   .subscribe();
 
   const channel = supabase
     .channel("table_db_changes")

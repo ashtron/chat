@@ -3,7 +3,6 @@
 import { createPagesBrowserClient } from "@supabase/auth-helpers-nextjs";
 import { useState, useEffect } from "react";
 
-import "./globals.css";
 import "./home.css";
 
 export default function Home() {

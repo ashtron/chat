@@ -1,3 +1,8 @@
 ul li {
   list-style-type: none;
 }
+
+ul {
+  overflow: scroll;
+  height: 500px;
+}

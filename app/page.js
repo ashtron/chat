@@ -11,17 +11,17 @@ export default function Home() {
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
 
+  const dummy = useRef(null);
+
   useEffect(() => {
     const fetchMessages = async () => {
       const messages = await supabase.from("messages").select("*");
 
-      setMessages(messages.data.map((item) => item.content));
+      setMessages(messages.data);
     };
 
     fetchMessages();
   }, []);
-
-  const dummy = useRef(null);
 
   useEffect(() => {
     dummy.current.scrollIntoView({ behavior: "smooth" });
@@ -34,10 +34,14 @@ export default function Home() {
       .select();
   };
 
-  const handleClick = (event) => {
-    event.preventDefault();
+  const fetchRandomGif = async () => {
+    const data = await fetch(
+      "https://api.giphy.com/v1/gifs/random?api_key=dAIQnIxqaWw2IguBnI6o5t2WY2Xubp17&tag=burrito"
+    );
 
-    insertMessage(messageInput);
+    console.log("data:", await data);
+
+    return data.images.original.url;
   };
 
   const handleChange = (event) => {
@@ -54,6 +58,12 @@ export default function Home() {
     }
   };
 
+  const handleClick = (event) => {
+    event.preventDefault();
+
+    insertMessage(messageInput);
+  };
+
   const channel = supabase
     .channel("table_db_changes")
     .on(
@@ -64,7 +74,8 @@ export default function Home() {
         table: "messages",
       },
       (payload) => {
-        setMessages([...messages, payload.new.content]);
+        setMessages([...messages, payload.new]);
+        console.log("payload:", payload);
       }
     )
     .subscribe();
@@ -74,6 +85,12 @@ export default function Home() {
       <header>Chat</header>
       <ul>
         {messages.map((message) => {
+          console.log("message:", message);
+          return message.image_url ? (
+            <img src={message.image_url} alt="" />
+          ) : (
+            <li>{message.content}</li>
+          );
           return <li>{message}</li>;
         })}
         <div ref={dummy} />

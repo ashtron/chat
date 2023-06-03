@@ -28,18 +28,35 @@ export default function Home() {
   }, [messages]);
 
   const insertMessage = async (message) => {
-    await supabase
-      .from("messages")
-      .insert([{ content: message }])
-      .select();
+    const regex = /^\/gif\s(.+)$/;
+
+    const gifSearchQuery = message.match(regex)
+      ? message.match(regex)[1]
+      : null;
+
+    if (gifSearchQuery) {
+      await supabase
+        .from("messages")
+        .insert([
+          {
+            content: message,
+            image_url: await fetchRandomGifURL(gifSearchQuery),
+          },
+        ])
+        .select();
+    } else {
+      await supabase
+        .from("messages")
+        .insert([{ content: message }])
+        .select();
+    }
   };
 
-  const fetchRandomGif = async () => {
-    const data = await fetch(
-      "https://api.giphy.com/v1/gifs/random?api_key=dAIQnIxqaWw2IguBnI6o5t2WY2Xubp17&tag=burrito"
-    );
-
-    console.log("data:", await data);
+  const fetchRandomGifURL = async (query) => {
+    const searchURL = `https://api.giphy.com/v1/gifs/random?api_key=${process.env.NEXT_PUBLIC_GIPHY_API_KEY}&tag=${query}`;
+    const results = await fetch(searchURL);
+    const parsedResults = await results.json();
+    const data = parsedResults.data;
 
     return data.images.original.url;
   };
@@ -75,7 +92,6 @@ export default function Home() {
       },
       (payload) => {
         setMessages([...messages, payload.new]);
-        console.log("payload:", payload);
       }
     )
     .subscribe();
@@ -85,9 +101,15 @@ export default function Home() {
       <header>Chat</header>
       <ul>
         {messages.map((message) => {
-          console.log("message:", message);
           return message.image_url ? (
-            <img src={message.image_url} alt="" />
+            <li>
+              <figure>
+                <img
+                  src={message.image_url}
+                />
+                <figcaption>{message.content}</figcaption>
+              </figure>
+            </li>
           ) : (
             <li>{message.content}</li>
           );

@@ -1,7 +1,9 @@
 "use client";
 
 import { createPagesBrowserClient } from "@supabase/auth-helpers-nextjs";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+
+import ChatWindow from "./components/chat-window";
 
 import "./home.css";
 
@@ -10,8 +12,6 @@ export default function Home() {
 
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
-
-  const dummy = useRef(null);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -22,10 +22,6 @@ export default function Home() {
 
     fetchMessages();
   }, []);
-
-  useEffect(() => {
-    dummy.current.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
 
   const insertMessage = async (message) => {
     const regex = /^\/gif\s(.+)$/;
@@ -99,24 +95,7 @@ export default function Home() {
   return (
     <article>
       <header>Chat</header>
-      <ul>
-        {messages.map((message) => {
-          return message.image_url ? (
-            <li>
-              <figure>
-                <img
-                  src={message.image_url}
-                />
-                <figcaption>{message.content}</figcaption>
-              </figure>
-            </li>
-          ) : (
-            <li>{message.content}</li>
-          );
-          return <li>{message}</li>;
-        })}
-        <div ref={dummy} />
-      </ul>
+      <ChatWindow messages={messages} />
       <footer>
         <input
           value={messageInput}

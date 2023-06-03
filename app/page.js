@@ -63,18 +63,21 @@ export default function Home() {
     setMessageInput(event.target.value);
   };
 
+  const handleSend = (event) => {
+    event.preventDefault();
+
+    insertMessage(messageInput);
+    setMessageInput("");
+  };
+
   const handleKeyDown = (event) => {
     if (event.keyCode === 13) {
-      event.preventDefault();
-
-      insertMessage(messageInput);
+      handleSend(event);
     }
   };
 
   const handleClick = (event) => {
-    event.preventDefault();
-
-    insertMessage(messageInput);
+    handleSend(event);
   };
 
   const channel = supabase

@@ -9,24 +9,21 @@ export default function ChatWindow(props) {
     dummy.current.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-   return (
+  return (
     <ul>
-        {messages.map((message) => {
-          return message.image_url ? (
-            <li>
-              <figure>
-                <img
-                  src={message.image_url}
-                />
-                <figcaption>{message.content}</figcaption>
-              </figure>
-            </li>
-          ) : (
-            <li>{message.content}</li>
-          );
-          return <li>{message}</li>;
-        })}
-        <div ref={dummy} />
-      </ul>
-   )
+      {messages.map((message) => {
+        return message.image_url ? (
+          <li key={message.id}>
+            <figure>
+              <img src={message.image_url} />
+              <figcaption>{message.content}</figcaption>
+            </figure>
+          </li>
+        ) : (
+          <li key={message.id}>{message.content}</li>
+        );
+      })}
+      <div ref={dummy} />
+    </ul>
+  );
 }

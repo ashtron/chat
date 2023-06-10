@@ -1,17 +1,33 @@
 "use client";
 
-import { createPagesBrowserClient } from "@supabase/auth-helpers-nextjs";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { getSession } from "./lib/auth-utilities";
 
 import ChatWindow from "./components/chat-window";
 
 import "./home.css";
 
 export default function Home() {
-  const supabase = createPagesBrowserClient();
+  const supabase = createClientComponentClient();
+
+  const router = useRouter();
 
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
+
+  useEffect(() => {
+    async function protectPage() {
+      const session = await getSession();
+      
+      if (!session) {
+        router.push("/login");
+      }
+    }
+
+    protectPage();
+  }, []);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -31,20 +47,20 @@ export default function Home() {
       : null;
 
     if (gifSearchQuery) {
+      const randomGifURL = await fetchRandomGifURL(gifSearchQuery);
+
       await supabase
         .from("messages")
         .insert([
           {
             content: message,
-            image_url: await fetchRandomGifURL(gifSearchQuery),
+            image_url: randomGifURL,
           },
-        ])
-        .select();
+        ]);
     } else {
       await supabase
         .from("messages")
-        .insert([{ content: message }])
-        .select();
+        .insert([{ content: message }]);
     }
   };
 

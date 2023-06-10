@@ -20,7 +20,7 @@ export default function Home() {
   useEffect(() => {
     async function protectPage() {
       const session = await getSession();
-      
+
       if (!session) {
         router.push("/login");
       }
@@ -49,18 +49,14 @@ export default function Home() {
     if (gifSearchQuery) {
       const randomGifURL = await fetchRandomGifURL(gifSearchQuery);
 
-      await supabase
-        .from("messages")
-        .insert([
-          {
-            content: message,
-            image_url: randomGifURL,
-          },
-        ]);
+      await supabase.from("messages").insert([
+        {
+          content: message,
+          image_url: randomGifURL,
+        },
+      ]);
     } else {
-      await supabase
-        .from("messages")
-        .insert([{ content: message }]);
+      await supabase.from("messages").insert([{ content: message }]);
     }
   };
 
@@ -112,17 +108,19 @@ export default function Home() {
     .subscribe();
 
   return (
-    <article>
-      <header>Chat</header>
-      <ChatWindow messages={messages} />
-      <footer>
-        <input
-          value={messageInput}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-        />
-        <button onClick={handleClick}>Send</button>
-      </footer>
-    </article>
+    <main>
+      <article>
+        <header>Chat</header>
+        <ChatWindow messages={messages} />
+        <footer>
+          <input
+            value={messageInput}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+          />
+          <button onClick={handleClick}>Send</button>
+        </footer>
+      </article>
+    </main>
   );
 }
